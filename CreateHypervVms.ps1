@@ -15,7 +15,7 @@ $adminPassword = 'some0815pwd!'   # use single quotes to avoid PS special chars 
 $currentPath = (Get-Location).Path
 $vmConfig = Import-PowerShellDataFile $("$currentPath\1_VMs.psd1")
 $vmUnattendConfig = Import-PowerShellDataFile $("$currentPath\2_UnattendSettings.psd1")
-$vmPostInstallConfig = Import-PowerShellDataFile $("$currentPath\3_PostInstallScrips.psd1")
+$vmPostInstallConfig = Import-PowerShellDataFile $("$currentPath\3_PostInstallScripts.psd1")
 
 # Do not change anything below this line unless you know what you are doing
 #   |
@@ -42,7 +42,7 @@ $testPaths = @(
         abortscript  = $true
     }
     @{
-        path         = $("$currentPath\3_PostInstallScrips.psd1")
+        path         = $("$currentPath\3_PostInstallScripts.psd1")
         errormessage = "Unattend config file not found at $currentPath\2_UnattendSettings.psd1"
         abortscript  = $false
     }
