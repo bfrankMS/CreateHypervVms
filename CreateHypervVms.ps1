@@ -252,10 +252,23 @@ function Clear-UnDefinedUnattendSections {
     $components.RemoveChild($childToDelete) | Out-Null
 }
 function Wait-ForPSDirect([string]$VMName, $cred) {
-    while ((Invoke-Command -VMName $VMName -Credential $cred { 'Test' } -ea SilentlyContinue) -ne 'Test') { Start-Sleep -Seconds 5 }
-}
-$ErrorActionPreference = 'SilentlyContinue'
+   
+    #make sure VM is up and running
+    while ((Get-VM -Name $VMName | Select-Object PrimaryOperationalStatus).tolower() -ne 'ok') { Start-Sleep -Seconds 5 }
 
+    #make sure integration component heartbeat is responsive
+    while ((Get-VMIntegrationService $VMName -Name 'Heartbeat' -Credential $cred).PrimaryStatusDescription.tolower() -ne 'OK') { Start-Sleep -Seconds 5 }
+
+    #make sure VM can take remote commands
+    while ((Invoke-Command -VMName $VMName -Credential $cred { 'Test' } -ea SilentlyContinue) -ne 'Test') { Start-Sleep -Seconds 5 }
+   
+    #make sure nobody is logged at the console (unattend)
+    $checkForConsoleUser = {
+        $consoleuser = &query user | select-string 'console';
+        [System.string]::IsNullOrEmpty($consoleuser)
+    }
+    while ((Invoke-Command -VMName $VMName -Credential $cred $checkForConsoleUser -ea SilentlyContinue) -ne $true) { Start-Sleep -Seconds 5 }
+}
 #endregion
 
 # Test the config files or abort script
@@ -414,7 +427,7 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
 "* Performing Post Install *"
 "***************************`n"
 
-$postInstallVMs = ($vmPostInstallConfig.GetEnumerator())
+$postInstallVMs = ($vmPostInstallConfig.GetEnumerator() | Sort-Object Name)
 
 foreach ($postInstallVM in $postInstallVMs) {
     $vmName = ($vmConfig.GetEnumerator() | Where-Object name -EQ $($postInstallVM.Name)).value.vmname
