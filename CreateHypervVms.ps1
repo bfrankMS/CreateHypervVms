@@ -64,7 +64,7 @@ $totalVmMemory = [decimal]0
 #gather vm settings
 foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
     $vmNics = $vm.Value.vmNics 
-    $totalVmMemory  += $vm.Value.vmMemory  
+    $totalVmMemory += $vm.Value.vmMemory  
     foreach ($vmNic in $($vmNics.GetEnumerator() | Sort-Object Name)) {
         $vmSwitchesNames += $($VMNic.Value.Switch)
     }
@@ -102,7 +102,7 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
         $vmDirectory = $vmDirectoryPrefix + "\" + $vmName #+ "{0:00}" -f $i  #e.g. 'D:\VMs\TN01...', 02, 03,...
     }
 
-    if ((Get-ChildItem -Path $vmDirectory -Recurse | Measure-Object).Count -gt 0)  {
+    if ((Get-ChildItem -Path $vmDirectory -Recurse | Measure-Object).Count -gt 0) {
         Write-Host "...directory $vmDirectory is not empty...aborting" -ForegroundColor Red
         exit
     }
@@ -264,7 +264,7 @@ function Wait-ForPSDirect([string]$VMName, $cred) {
    
     #make sure nobody is logged at the console (unattend)
     $checkForConsoleUser = {
-        $consoleuser = &query user | select-string 'console';
+        $consoleuser = &query user | Select-String 'console';
         [System.string]::IsNullOrEmpty($consoleuser)
     }
     while ((Invoke-Command -VMName $VMName -Credential $cred $checkForConsoleUser -ea SilentlyContinue) -ne $true) { Start-Sleep -Seconds 5 }
@@ -388,8 +388,7 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
                 Get-UnattendSection 'oobeSystem' 'Microsoft-Windows-International-Core' $unattend | ForEach-Object { $_.InputLocale = $vmUnattendConfig[$vm.Name].InputLocale };
                 Get-UnattendSection 'oobeSystem' 'Microsoft-Windows-International-Core' $unattend | ForEach-Object { $_.SystemLocale = $vmUnattendConfig[$vm.Name].SystemLocale };
                 Get-UnattendSection 'oobeSystem' 'Microsoft-Windows-International-Core' $unattend | ForEach-Object { $_.UserLocale = $vmUnattendConfig[$vm.Name].UserLocale };
-    
-                # Write it out to disk
+               # Write it out to disk
                 $UnattendFile = $($Drive.DriveLetter + ':\Unattend.xml')
                 $unattend.Save($UnattendFile);
             }
@@ -407,7 +406,7 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
     Add-VMHardDiskDrive -VMName $VmName -Path $OSVHD
 
     foreach ($vmDataDisk in $vmDataDisks) {
-        "...attaching data disk $($vmDataDisk.DiskName) with size $($vmDataDisk.DiskSize)"
+       "...attaching data disk $($vmDataDisk.DiskName) with size $($vmDataDisk.DiskSize)"
         $DiskPath = $vhdDirectory + "\" + $($vmDataDisk.DiskName)
         New-VHD -Path $DiskPath -SizeBytes $([uint64]$($vmDataDisk.DiskSize)) -Dynamic
         Add-VMHardDiskDrive -VMName $VmName -Path $DiskPath
