@@ -24,7 +24,7 @@ Components: Hyper-V with corresponding PowerShell module.
 Works either launched locally or using PS remoting.
 
 ## How to use it.
-[![CreateHypervVMs on YTube](https://img.youtube.com/vi/A_zNSNHOKJU/0.jpg)
+[![CreateHypervVMs on YTube](https://img.youtube.com/vi/A_zNSNHOKJU/0.jpg)](https://www.youtube.com/watch?v=A_zNSNHOKJU)
 1. Copy this repositories contents to your Hyper-V system - e.g. c:\temp
 2. Place a sysprep'ed .vhdx file containing the Windows OS you want to deploy into a folder.
 3. Adjust the *$GoldenImage* variable in your copy of the [CreateHypervVms.ps1](./CreateHypervVms.ps1) file to match the path from step 2.
