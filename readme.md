@@ -39,21 +39,30 @@ Works either launched locally or using PS remoting.
 
 0. Choose a starting repository e.g. [Scenario-Blueprint](./Scenario-Blueprint),....
 1. Copy the selected repository's content to your Hyper-V system - e.g. c:\temp
-2. Place a sysprep'ed .vhdx file containing the Windows OS you want to deploy into a folder.
-3. Adjust the *$GoldenImage* variable in your copy of the [CreateHypervVms.ps1](./CreateHypervVms.ps1) file to match the path from step 2.
+2. Create a sysprep'ed .vhdx containing the Windows OS you want using [e.g. CreateVhdxFromIso.ps1](./Scenario-Blueprint/CreateVhdxFromIso.ps1).
+```PowerShell
+.\CreateVhdxFromIso.ps1 -SourcePath "D:\iso\Windows Server 2022\SERVER_EVAL_x64FRE_en-us.iso" -VhdxPath 'c:\images\W2k22.vhdx' -SizeBytes 80GB -ImageIndex 4
+# you can use .iso files with OS from Microsoft.
+# -ImageIndex 1 : is the first image in the install.wim 
+# -ImageIndex 1 : mostly is a Server Standard Core
+# -ImageIndex 4 : mostly is a Server Datacenter with GUI
+# Mount .iso and run Get-WindowsImage -ImagePath "X:\sources\install.wim" to find out what imageindex to choose.
+```
+
+3. Adjust the *$GoldenImage* variable in your copy of the [e.g. CreateHypervVms.ps1](./Scenario-Blueprint/CreateHypervVms.ps1) file to match the path from step 2.
 ```PowerShell
 # 1. Create a golden image and adjust these variables
 $GoldenImage = "c:\images\W2k22.vhdx"       # path to a sysprepped virtual hard disk (UEFI i.e. Gen2 VMs) to be used as a golden image
 ```
-4. Make the *$vmDirectoryPrefix* variable of your copy of *CreateHypervVms.ps1* point to the VMs final path destination.
+1. Make the *$vmDirectoryPrefix* variable of your copy of *CreateHypervVms.ps1* point to the VMs final path destination.
 ```PowerShell
 $vmDirectoryPrefix = "c:\ClusterStorage\CSV1\createvms"   # generic path where the VMs will be created - each VM gets its subfolder
 ```
-5. Choose a complex default password for your *$adminPassword* variable of your copy of *CreateHypervVms.ps1*
+1. Choose a complex default password for your *$adminPassword* variable of your copy of *CreateHypervVms.ps1*
 ```PowerShell
 # Provide a complex generic local admin pwd
 $adminPassword = 'some0815pwd!'   # use single quotes to avoid PS special chars interpretation problems (e.g. $ in pwd problems)
 ```
-6. Define the **Hyper-V details** of the VMs to create by **modifying your copy** of [1_VMs.psd1](./1_VMs.psd1). Open the file in a PowerShell scripting editor and read the comments.
-7. Define the **OS details** of the VMs by modifying your copy of [2_UnattendSettings.psd1](./2_UnattendSettings.psd1). Open the file in a PowerShell scripting editor and read the comments.
-8. Define the **Post installation steps** of the VMs by modifying your copy of [3_PostInstallScripts.psd1](./3_PostInstallScripts.psd1). Open the file in a PowerShell scripting editor and read the comments.
+1. Define the **Hyper-V details** of the VMs to create by **modifying your copy** of [1_VMs.psd1](./1_VMs.psd1). Open the file in a PowerShell scripting editor and read the comments.
+2. Define the **OS details** of the VMs by modifying your copy of [2_UnattendSettings.psd1](./2_UnattendSettings.psd1). Open the file in a PowerShell scripting editor and read the comments.
+3. Define the **Post installation steps** of the VMs by modifying your copy of [3_PostInstallScripts.psd1](./3_PostInstallScripts.psd1). Open the file in a PowerShell scripting editor and read the comments.
