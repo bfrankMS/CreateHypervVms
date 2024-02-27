@@ -15,7 +15,18 @@ This set of scripts will create VMs on Hyper-V based on a golden image (i.e. sys
 - ...VMs will be created with the size, name, # of network adapters, # disks on Hyper-V how you define [1_VM.psd1](./1_VMs.psd1)
 - ...Each VM gets its own configuration using unattend.xml - how you specify [2_UnattendSettings.psd1](./2_UnattendSettings.psd1)
 - ...After the OS is installed you can define a set of post install PShell scripts to be run to custimize each individual VM [3_PostInstallScripts.psd1](./3_PostInstallScripts.psd1)  
-**-->take this repo as a blueprint and adjust to your needs.**
+**-->take [Scenario-BluePrint](./Scenario-BluePrint) as starting point and adjust to your needs.**  
+
+## Credits & Inspirations - Or Why I Did This?  
+I have been working with Hyper-V for years and created a lot of VMs over the time - either manual or automatically.
+It was blog posts like these:  
+- https://github.com/microsoft/MSLab
+- https://github.com/BladeFireLight/WindowsImageTools/tree/master
+- https://learn.microsoft.com/en-us/archive/blogs/virtual_pc_guy/script-image-factory-for-hyper-v
+- http://www.altaro.com/hyper-v/creating-generation-2-disk-powershell/
+that inspired me to code this. So why did I still do this? Well for 2 reasons:
+1. For learning & understanding
+2. For having something that is packageable - lightweight - customizable - from the creation to the final OS.
 
 ## Requirements
 OS: Windows Server 2016, Windows Server 2019, Windows Server 2022, Azure Stack HCI (22H2, 23H2)
@@ -25,19 +36,21 @@ Works either launched locally or using PS remoting.
 
 ## How to use it.
 [![CreateHypervVMs on YTube](https://img.youtube.com/vi/A_zNSNHOKJU/0.jpg)](https://www.youtube.com/watch?v=A_zNSNHOKJU)
-1. Copy this repositories contents to your Hyper-V system - e.g. c:\temp
+
+0. Choose a starting repository e.g. [Scenario-BluePrint](./Scenario-BluePrint),....
+1. Copy the selected repository's content to your Hyper-V system - e.g. c:\temp
 2. Place a sysprep'ed .vhdx file containing the Windows OS you want to deploy into a folder.
 3. Adjust the *$GoldenImage* variable in your copy of the [CreateHypervVms.ps1](./CreateHypervVms.ps1) file to match the path from step 2.
-```c#
+```PowerShell
 # 1. Create a golden image and adjust these variables
 $GoldenImage = "c:\images\W2k22.vhdx"       # path to a sysprepped virtual hard disk (UEFI i.e. Gen2 VMs) to be used as a golden image
 ```
 4. Make the *$vmDirectoryPrefix* variable of your copy of *CreateHypervVms.ps1* point to the VMs final path destination.
-```c#
+```PowerShell
 $vmDirectoryPrefix = "c:\ClusterStorage\CSV1\createvms"   # generic path where the VMs will be created - each VM gets its subfolder
 ```
 5. Choose a complex default password for your *$adminPassword* variable of your copy of *CreateHypervVms.ps1*
-```c#
+```PowerShell
 # Provide a complex generic local admin pwd
 $adminPassword = 'some0815pwd!'   # use single quotes to avoid PS special chars interpretation problems (e.g. $ in pwd problems)
 ```

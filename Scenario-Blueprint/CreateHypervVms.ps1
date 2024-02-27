@@ -4,6 +4,13 @@
 #
 ##########################################################
 
+# inspirations and alternatives.
+# https://github.com/microsoft/MSLab
+# https://github.com/BladeFireLight/WindowsImageTools/tree/master
+# https://learn.microsoft.com/en-us/archive/blogs/virtual_pc_guy/script-image-factory-for-hyper-v
+# http://www.altaro.com/hyper-v/creating-generation-2-disk-powershell/
+
+
 # 1. Create a golden image and adjust these variables
 $GoldenImage = "c:\images\W2k22.vhdx"       # path to a sysprepped virtual hard disk (UEFI i.e. Gen2 VMs) to be used as a golden image
 $vmDirectoryPrefix = "c:\ClusterStorage\CSV1\createvms"   # generic path where the VMs will be created - each VM gets its subfolder
