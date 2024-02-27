@@ -15,7 +15,7 @@ This set of scripts will create VMs on Hyper-V based on a golden image (i.e. sys
 - ...VMs will be created with the size, name, # of network adapters, # disks on Hyper-V how you define [1_VM.psd1](./1_VMs.psd1)
 - ...Each VM gets its own configuration using unattend.xml - how you specify [2_UnattendSettings.psd1](./2_UnattendSettings.psd1)
 - ...After the OS is installed you can define a set of post install PShell scripts to be run to custimize each individual VM [3_PostInstallScripts.psd1](./3_PostInstallScripts.psd1)  
-**-->take [Scenario-BluePrint](./Scenario-BluePrint) as starting point and adjust to your needs.**  
+**-->take [Scenario-Blueprint](./Scenario-Blueprint) as starting point and adjust to your needs.**  
 
 ## Credits & Inspirations - Or Why I Did This?  
 I have been working with Hyper-V for years and created a lot of VMs over the time - either manual or automatically.
@@ -37,7 +37,7 @@ Works either launched locally or using PS remoting.
 ## How to use it.
 [![CreateHypervVMs on YTube](https://img.youtube.com/vi/A_zNSNHOKJU/0.jpg)](https://www.youtube.com/watch?v=A_zNSNHOKJU)
 
-0. Choose a starting repository e.g. [Scenario-BluePrint](./Scenario-BluePrint),....
+0. Choose a starting repository e.g. [Scenario-Blueprint](./Scenario-Blueprint),....
 1. Copy the selected repository's content to your Hyper-V system - e.g. c:\temp
 2. Place a sysprep'ed .vhdx file containing the Windows OS you want to deploy into a folder.
 3. Adjust the *$GoldenImage* variable in your copy of the [CreateHypervVms.ps1](./CreateHypervVms.ps1) file to match the path from step 2.
