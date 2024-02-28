@@ -61,11 +61,10 @@ Disable-NetAdapterBinding -InterfaceAlias * -ComponentID ms_tcpip6
 $verbosePreference = "Continue"
 $subscription = "a2ba2.........7e6f"
 $tenantID = "47f4...........aab0"
-$myCredential = Get-Credential
 $rg = "rg-myHCI...."    # an existing an configured RG.
 $region = "westeurope"  #or eastus???
 try {
-  Connect-AzAccount -TenantId $tenantID -Credential $myCredential
+  Connect-AzAccount -TenantId $tenantID -UseDeviceAuthentication
   $armAccessToken = (Get-AzAccessToken).Token
   $id = (Get-AzContext).Account.Id
   Start-Sleep -Seconds 3
