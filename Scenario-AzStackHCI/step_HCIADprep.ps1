@@ -17,7 +17,7 @@ Install-Module AsHciADArtifactsPreCreationTool -Repository PSGallery -Force
 
 `$securePwd = ConvertTo-SecureString "`$deployUserPwd" -AsPlainText -Force
 `$credential = New-Object System.Management.Automation.PSCredential (`$deployUserName, `$securePwd)
-New-HciAdObjectsPreCreation -AzureStackLCMUserCredential $credential -AsHciOUName "$OU"
+New-HciAdObjectsPreCreation -AzureStackLCMUserCredential `$credential -AsHciOUName "`$OU"
 "@
 
 "outputting 'Prepare Active Directory for Azure Stack HCI, version 23H2 deployment'  to $tmppath\step_HCIADprep.ps1"
