@@ -7,12 +7,8 @@ if (!(Test-Path -Path $tmppath)){mkdir $tmppath}
 $adPrepCode = @"
 # Prepare Active Directory for Azure Stack HCI, version 23H2 deployment 
 # https://learn.microsoft.com/en-us/azure-stack/hci/deploy/deployment-prep-active-directory
-
+# Creates OU (just 1 level i.e. 'OU=HCI') in existing OU path (i.e. 'DC=HCI00,DC=org') and adds user to OU if it does not exist (if it exists it will only give it permissions to the OU)
 `$OU="OU=HCI,DC=HCI00,DC=org"
-`$serverList = @("00-HCI-1","00-HCI-2")
-`$domainFQDN = "hci00.org"
-`$asHciClusterName = "HCInest"
-`$asHciDeploymentPrefix = "hci"
 `$deployUserName = "asLCMUser"
 `$deployUserPwd = "%YourPasswordHere%"
 
@@ -21,7 +17,7 @@ Install-Module AsHciADArtifactsPreCreationTool -Repository PSGallery -Force
 
 `$securePwd = ConvertTo-SecureString "`$deployUserPwd" -AsPlainText -Force
 `$credential = New-Object System.Management.Automation.PSCredential (`$deployUserName, `$securePwd)
-New-HciAdObjectsPreCreation -Deploy -AzureStackLCMUserCredential `$credential -AsHciOUName "`$OU" -AsHciPhysicalNodeList `$serverList  -DomainFQDN "`$domainFQDN" -AsHciClusterName "`$asHciClusterName" -AsHciDeploymentPrefix "`$asHciDeploymentPrefix"
+New-HciAdObjectsPreCreation -AzureStackLCMUserCredential $credential -AsHciOUName "$OU"
 "@
 
 "outputting 'Prepare Active Directory for Azure Stack HCI, version 23H2 deployment'  to $tmppath\step_HCIADprep.ps1"
