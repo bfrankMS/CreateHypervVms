@@ -2,8 +2,8 @@
 @{
     VM0 = @{                                            # VM0 is the first VM - do not change this name
         ComputerName  = '00-DC-1'                       # computer name in the OS
-        Organization  = 'myavd'                         # organization name in the OS
-        Owner         = 'myavd'                         
+        Organization  = 'myhci'                         # organization name in the OS
+        Owner         = 'myhci'                         
         Timezone      = 'W. Europe Standard Time'       # ??? Timezone in OS you can do (PShell) to find yours  "get-timezone -ListAvailable | out-gridview -OutputMode Single | Select-Object ID"
         InputLocale   = 'de-DE'                         # ??? Keyboard layout in OS
         SystemLocale  = 'en-US'                         # System locale in OS (sorting, etc.)
@@ -15,8 +15,8 @@
     }
     VM1 = @{                                            # VM1 is the second VM - do not change this name
         ComputerName = '00-HCI-1'
-        Organization = 'myavd'
-        Owner        = 'myavd'
+        Organization = 'myhci'
+        Owner        = 'myhci'
         Timezone     = 'W. Europe Standard Time'
         InputLocale  = 'de-DE'
         SystemLocale = 'en-US'
@@ -28,8 +28,8 @@
     }
     VM2 = @{                                            
         ComputerName = '00-HCI-2'
-        Organization = 'myavd'
-        Owner        = 'myavd'
+        Organization = 'myhci'
+        Owner        = 'myhci'
         Timezone     = 'W. Europe Standard Time'
         InputLocale  = 'de-DE'
         SystemLocale = 'en-US'
