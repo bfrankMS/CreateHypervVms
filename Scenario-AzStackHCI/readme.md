@@ -17,6 +17,7 @@
 # This will make the nested HCIs storage adapters allow vlan usage  
 Get-VMNetworkAdapter -vmname '00-hci-1' -Name smb* | Set-VMNetworkAdapterVlan -Trunk -NativeVlanId 0 -AllowedVlanIdList 711-712
 Get-VMNetworkAdapter -vmname '00-hci-2' -Name smb* | Set-VMNetworkAdapterVlan -Trunk -NativeVlanId 0 -AllowedVlanIdList 711-712
+
 ```
 
 ### 6. Check your environment (test connectivity and prep AD for HCI)
@@ -49,6 +50,7 @@ foreach ($module in $modules) {
         Install-Module -Name $module -Force
     }
 }
+
 ``` 
 
 - Disable IPv6 on all of the adapters if it was not configured by you. e.g. 
@@ -74,6 +76,7 @@ catch {
   "first try failed retrying..."
   Invoke-AzStackHciArcInitialization -subscription $subscription -ResourceGroup $rg -TenantID $tenantID -Region $region -Cloud 'AzureCloud' -ArmAccesstoken $armAccessToken -AccountID $id -verbose
 }
+
 ```
 
 ### 8. Start your deployment from the Azure Portal  
