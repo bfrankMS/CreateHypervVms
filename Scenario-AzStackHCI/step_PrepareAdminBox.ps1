@@ -11,7 +11,7 @@ $logfile = "PostInstallScripts.log"
 #create folder if it doesn't exist
 if (!(Test-Path -Path $tmppath)) { mkdir $tmppath }
 Start-Transcript "$tmppath\$logfile" -Append
-"I was run at $(Get-Date)"
+"(step_PrepareAdminBox.ps1) was run at $(Get-Date)"
 
 #region Set Ext IP Address
     $externalAdapter = Get-NetAdapterAdvancedProperty | Where-Object { $_.DisplayValue -eq $externalAdapterName }
@@ -84,8 +84,9 @@ Start-Process -FilePath net -ArgumentList "net start remoteaccess" -Wait -Verbos
 
 #region Install MMC tools
 "Installing MMC tools"
-Install-WindowsFeature -Name RSAT-Clustering -IncludeAllSubFeature
-Install-WindowsFeature -Name RSAT-Hyper-V-Tools -IncludeAllSubFeature
+Install-WindowsFeature -Name RSAT-Clustering -IncludeAllSubFeature -verbose
+Install-WindowsFeature -Name RSAT-Hyper-V-Tools -IncludeAllSubFeature -verbose
 #endregion
 
+Stop-Transcript
 

@@ -3,7 +3,7 @@ $logfile = "PostInstallScripts.log"
 #create folder if it doesn't exist
 if (!(Test-Path -Path $tmppath)){mkdir $tmppath}
 Start-Transcript "$tmppath\$logfile" -Append
-"I was run at $(Get-Date)"
+"(step_DoWindowsUpdates.ps1) was run at $(Get-Date)"
 
 $updateSession = New-Object -ComObject "Microsoft.Update.Session"
 $updateSession.ClientApplicationID = "PowerShell Sample Script"

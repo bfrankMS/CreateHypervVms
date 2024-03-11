@@ -55,7 +55,8 @@ foreach ($module in $modules) {
 
 - Disable IPv6 on all of the adapters if it was not configured by you. e.g. 
 ```PowerShell
-Disable-NetAdapterBinding -InterfaceAlias * -ComponentID ms_tcpip6   
+Disable-NetAdapterBinding -InterfaceAlias * -ComponentID ms_tcpip6
+  
 ```
 
 ### 7. Onboard your AzStack HCI hosts to Azure using e.g.

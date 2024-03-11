@@ -1,8 +1,10 @@
-$tmppath = "c:\temp"
 
+$tmppath = "c:\temp\" 
+$logfile = "PostInstallScripts.log"
 #create folder if it doesn't exist
-if (!(Test-Path -Path $tmppath)){mkdir $tmppath}
-
+if (!(Test-Path -Path $tmppath)) { mkdir $tmppath }
+Start-Transcript "$tmppath\$logfile" -Append
+"(step_HCIADPrep.ps1) was run at $(Get-Date)"
 
 $adPrepCode = @"
 # Prepare Active Directory for Azure Stack HCI, version 23H2 deployment 
@@ -21,5 +23,6 @@ New-HciAdObjectsPreCreation -AzureStackLCMUserCredential `$credential -AsHciOUNa
 "@
 
 "outputting 'Prepare Active Directory for Azure Stack HCI, version 23H2 deployment'  to $tmppath\step_HCIADprep.ps1"
-$adPrepCode | Out-File -FilePath "$tmppath\step_HCIADprep.ps1" -Force
+$adPrepCode | Out-File -FilePath "$tmppath\step_HCIADprep.ps1" -Force -Verbose
 
+Stop-Transcript

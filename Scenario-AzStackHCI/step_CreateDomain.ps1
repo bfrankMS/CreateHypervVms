@@ -8,21 +8,20 @@ param(
 
 #this will be our temp folder - need it for download / logging
 
-$tmpDir = "c:\temp\" 
-
+$tmppath = "c:\temp\" 
+$logfile = "PostInstallScripts.log"
 #create folder if it doesn't exist
-if (!(Test-Path $tmpDir)) { mkdir $tmpDir -Force }
-
-"(step_CreateDomain.ps1) was run at $(Get-Date)" | Out-File "$tmpDir\PostInstallScripts.log" -Force -Append
-
+if (!(Test-Path -Path $tmppath)) { mkdir $tmppath }
+Start-Transcript "$tmppath\$logfile" -Append
+"(step_CreateDomain.ps1) was run at $(Get-Date)"
 
 #To install AD we need PS support for AD first
-Install-WindowsFeature AD-Domain-Services -IncludeAllSubFeature -IncludeManagementTools
-Import-Module ActiveDirectory
+Install-WindowsFeature AD-Domain-Services -IncludeAllSubFeature -IncludeManagementTools -verbose
+Import-Module ActiveDirectory -Verbose
 
 
 #Do we find Data disks (raw by default) in this VM? 
-$RawDisks = Get-Disk | where PartitionStyle -eq "RAW"
+$RawDisks = Get-Disk | Where-Object PartitionStyle -eq "RAW"
 
 $driveLetters = ("f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z")
 
@@ -48,25 +47,24 @@ $SecurePassword = ConvertTo-SecureString "$Password" -AsPlainText -Force
 #Do we have Data Disk? 
 $DataDisk0 = Get-Volume -FileSystemLabel "Data0" -ErrorAction SilentlyContinue
 
-switch ($DataDisk0 -ne $null)
+switch ($null -ne $DataDisk0)
 {
     'True'      #Active Directory database storage on first Data Disk 
     {
         $drive = "$($DataDisk0.DriveLetter):"
-        Install-ADDSForest -DomainName "$DomainName" -DatabasePath "$drive\NTDS" -SysvolPath "$drive\SYSVOL" -LogPath "$drive\Logs" -ForestMode Default -DomainMode Default -InstallDns:$true -SafeModeAdministratorPassword $SecurePassword -CreateDnsDelegation:$false -NoRebootOnCompletion:$true -Force:$true
+        Install-ADDSForest -DomainName "$DomainName" -DatabasePath "$drive\NTDS" -SysvolPath "$drive\SYSVOL" -LogPath "$drive\Logs" -ForestMode Default -DomainMode Default -InstallDns:$true -SafeModeAdministratorPassword $SecurePassword -CreateDnsDelegation:$false -NoRebootOnCompletion:$true -Force:$true -verbose
     }
     
     #nope - not recommended 
     Default 
     {
-        Install-ADDSForest -DomainName "$DomainName" -ForestMode Default -DomainMode Default -InstallDns:$true -SafeModeAdministratorPassword $SecurePassword -CreateDnsDelegation:$false -NoRebootOnCompletion:$true -Force:$true
+        Install-ADDSForest -DomainName "$DomainName" -ForestMode Default -DomainMode Default -InstallDns:$true -SafeModeAdministratorPassword $SecurePassword -CreateDnsDelegation:$false -NoRebootOnCompletion:$true -Force:$true -verbose
     }
 }
 
 #add some DNS forwarders to our DNS server to enable external name resolution
-Add-DnsServerForwarder -IPAddress 8.8.8.8        #allow external name resolution
+Add-DnsServerForwarder -IPAddress 8.8.8.8  -verbose      #allow external name resolution
 
 shutdown.exe /r /t 10
-
 
 stop-transcript
