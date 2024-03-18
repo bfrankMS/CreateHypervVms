@@ -5,7 +5,11 @@
 - 2 empty HCI nodes (with a sypreppe'd AzStack HCI 23H2 vhdx you provide) - ready to be deployed to Azure Stack HCI using the Azure portal.  
 ![1DCand2NodesToPlayWith](./docs/3VMs.png)
 
-## You, need to:  
+
+## Watch It On YT  
+[![Installing Azure Stack HCI 23H2 in VMs (Part 1)](https://img.youtube.com/vi/_8QimlTNQpI/0.jpg)](https://youtu.be/_8QimlTNQpI)  
+
+## Summary Of Steps:  
 ### 1. Provide 2 golden images as vhdx (Win Server 2022 with GUI, AzStack HCI 23H2 vanilla) both from .iso file using e.g. [CreateVhdxFromIso.ps1](./CreateVhdxFromIso.ps1)
 ### 2. Copy the contents of this repo to a temp directory on the physical Hyper-V host.
 ### 3. Edit the files (1_VMs.psd1, 2_UnattendSettings.psd1, 3_PostInstallScripts.psd1, CreateHypervVms.ps1) according to your needs  
