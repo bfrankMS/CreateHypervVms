@@ -12,11 +12,11 @@
 
 
 # 1. Create a golden image and adjust these variables
-$GoldenImage = "c:\images\W2k22.vhdx"       # path to a sysprepped virtual hard disk (UEFI i.e. Gen2 VMs) to be used as a golden image
-$vmDirectoryPrefix = "c:\ClusterStorage\CSV1\createvms"   # generic path where the VMs will be created - each VM gets its subfolder
+$GoldenImage = "c:\.....\W2k22.vhdx"       # ??? path to a sysprepped virtual hard disk (UEFI i.e. Gen2 VMs) to be used as a golden image
+$vmDirectoryPrefix = "c:\.....your VM storage....\AzStack"   # ??? generic path where the VMs will be created - each VM gets its subfolder
 
 # 2. Provide a complex generic local admin pwd
-$adminPassword = 'some0815pwd!'   # use single quotes to avoid PS special chars interpretation problems (e.g. $ in pwd problems)
+$adminPassword = '....A complex PWD please.......'   # ??? use single quotes to avoid PS special chars interpretation problems (e.g. $ in pwd problems)
 
 # 3. Navigate to the config files and adjust them to your needs
 $currentPath = (Get-Location).Path
@@ -84,7 +84,7 @@ if (!($null -eq $(Compare-Object -ReferenceObject $vmSwitches.Name -DifferenceOb
     exit
 }
 #abort if not enough memory available on host to start all VMs
-$freeRAMOnHost = [decimal](((Get-WMIObject Win32_OperatingSystem).FreePhysicalMemory)*1kB -1GB)
+$freeRAMOnHost = [decimal](((Get-WmiObject Win32_OperatingSystem).FreePhysicalMemory) * 1kB - 1GB)
 if ([decimal]$totalVmMemory -gt $freeRAMOnHost) {
     Write-Host "...not enough free vm memory (required: $($totalVmMemory/1GB)GB) on host (available: $([system.math]::round($($freeRAMOnHost/1GB),2))GB)...aborting" -ForegroundColor Red
     "exit"
@@ -313,6 +313,15 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
     New-Item -Path $vmDirectory -ItemType Directory -ErrorAction SilentlyContinue
     New-VM -Name $vmName -MemoryStartupBytes $vmMemory -NoVHD  -Path $vmDirectory -Generation $vmGeneration | Set-VM -ProcessorCount $vmProcCount  -AutomaticStopAction $vmAutomaticStopAction 
 
+    #region allow for nested virtualization
+    if ($vm.Value.ExposeVirtualizationExtensions)
+    {
+        "...enabling nested virtualization..."
+        Set-VMProcessor -VMName $vmName -ExposeVirtualizationExtensions $true
+        Start-Sleep -Seconds 5
+    }
+    #endregion
+
     #region VM's Network Adapters
     Get-VMNetworkAdapter -VMName $vmName | Remove-VMNetworkAdapter; Start-Sleep -Seconds 1
     #then add the desired ones in a sorted alphabetical order - the 1st one will be the one with the static MAC -> hence receive the static IP configured.
@@ -339,14 +348,30 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
         else {
             #"NIC: {0}   Switch: {1}" -f $VMNic.Name, $VMNic.Value.Switch
         }
+
+        if ($VMNic.Value.MacAddressSpoofing) {
+            Set-VMNetworkAdapter -VMName $VmName -Name $($VMNic.Name) -MacAddressSpoofing On
+        }
+
     } 
     #endregion
 
+
     $vhdDirectory = $vmDirectory + "\" + $vmName + "\Virtual Hard Disks"
     New-Item -Path $vhdDirectory -ErrorAction SilentlyContinue -ItemType Directory | Out-Null
+
+    if (!([System.String]::IsNullOrEmpty($vm.Value.GoldenImagePath))) {
+        $GoldenImagePath = $vm.Value.GoldenImagePath
+        $OSVHD = $vhdDirectory + "\" + $(Split-Path -Path $GoldenImagePath -Leaf)
+        "...copy vm specific OS disk to $OSVHD"
+        Copy-Item -Path $GoldenImagePath -Destination $OSVHD -ErrorAction Stop #-Verbose
+    }
+    else {
     $OSVHD = $vhdDirectory + "\" + $(Split-Path -Path $GoldenImage -Leaf)
-    "...copy OS disk to $OSVHD"
-    Copy-Item -Path $GoldenImage -Destination $OSVHD #-Verbose
+    "...copy generic OS disk to $OSVHD"
+    Copy-Item -Path $GoldenImage -Destination $OSVHD -ErrorAction Stop #-Verbose
+}
+
     "...mounting OS disk $OSVHD"
     $OSVolumes = Mount-VHD -Path $OSVHD -Passthru | Get-Disk | Get-Partition | Get-Volume
     foreach ($Drive in $OSVolumes) {
@@ -383,7 +408,13 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
                 #handling static or dynamic IP
                 if (!([System.String]::IsNullOrEmpty($vmUnattendConfig[$vm.Name].'IPAddress'))) {
                     Get-UnattendSection 'specialize' 'Microsoft-Windows-TCPIP' $unattend | ForEach-Object { $_.Interfaces.Interface.UnicastIpAddresses.IpAddress.'#text' = $vmUnattendConfig[$vm.Name].IPAddress + "/" + $($vmUnattendConfig[$vm.Name].IPMask) };
+
+                    if (!([System.String]::IsNullOrEmpty($vmUnattendConfig[$vm.Name].IPGateway))){
                     Get-UnattendSection 'specialize' 'Microsoft-Windows-TCPIP' $unattend | ForEach-Object { $_.Interfaces.Interface.Routes.Route.NextHopAddress = $vmUnattendConfig[$vm.Name].IPGateway };
+                    }else {
+                        (Get-UnattendSection 'specialize' 'Microsoft-Windows-TCPIP' $unattend | ForEach-Object { $_.Interfaces.Interface.Routes} ).RemoveAll()
+                    }
+                    
                     Get-UnattendSection 'specialize' 'Microsoft-Windows-DNS-Client' $unattend | ForEach-Object { $_.Interfaces.Interface.DNSServerSearchOrder.IpAddress.'#text' = $vmUnattendConfig[$vm.Name].DNSIP };
                     Get-UnattendSection 'specialize' 'Microsoft-Windows-TCPIP' $unattend | ForEach-Object { $_.Interfaces.Interface.Identifier = $MACAddress };
                     Get-UnattendSection 'specialize' 'Microsoft-Windows-DNS-Client' $unattend | ForEach-Object { $_.Interfaces.Interface.Identifier = $MACAddress };
@@ -395,6 +426,7 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
                 Get-UnattendSection 'oobeSystem' 'Microsoft-Windows-International-Core' $unattend | ForEach-Object { $_.InputLocale = $vmUnattendConfig[$vm.Name].InputLocale };
                 Get-UnattendSection 'oobeSystem' 'Microsoft-Windows-International-Core' $unattend | ForEach-Object { $_.SystemLocale = $vmUnattendConfig[$vm.Name].SystemLocale };
                 Get-UnattendSection 'oobeSystem' 'Microsoft-Windows-International-Core' $unattend | ForEach-Object { $_.UserLocale = $vmUnattendConfig[$vm.Name].UserLocale };
+
                # Write it out to disk
                 $UnattendFile = $($Drive.DriveLetter + ':\Unattend.xml')
                 $unattend.Save($UnattendFile);
