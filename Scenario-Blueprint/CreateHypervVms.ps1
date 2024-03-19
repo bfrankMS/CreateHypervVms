@@ -13,7 +13,7 @@
 
 # 1. Create a golden image and adjust these variables
 $GoldenImage = "c:\.....\W2k22.vhdx"       # ??? path to a sysprepped virtual hard disk (UEFI i.e. Gen2 VMs) to be used as a golden image
-$vmDirectoryPrefix = "c:\.....your VM storage....\AzStack"   # ??? generic path where the VMs will be created - each VM gets its subfolder
+$vmDirectoryPrefix = "c:\.....your VM storage....\myVms"   # ??? generic path where the VMs will be created - each VM gets its subfolder
 
 # 2. Provide a complex generic local admin pwd
 $adminPassword = '....A complex PWD please.......'   # ??? use single quotes to avoid PS special chars interpretation problems (e.g. $ in pwd problems)
