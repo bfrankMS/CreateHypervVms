@@ -4,16 +4,9 @@
 #
 ##########################################################
 
-# inspirations and alternatives.
-# https://github.com/microsoft/MSLab
-# https://github.com/BladeFireLight/WindowsImageTools/tree/master
-# https://learn.microsoft.com/en-us/archive/blogs/virtual_pc_guy/script-image-factory-for-hyper-v
-# http://www.altaro.com/hyper-v/creating-generation-2-disk-powershell/
-
-
 # 1. Create a golden image and adjust these variables
 $GoldenImage = "c:\.....\W2k22.vhdx"       # ??? path to a sysprepped virtual hard disk (UEFI i.e. Gen2 VMs) to be used as a golden image
-$vmDirectoryPrefix = "c:\.....your VM storage....\myVms"   # ??? generic path where the VMs will be created - each VM gets its subfolder
+$vmDirectoryPrefix = "c:\.....your VM storage....\AzStack"   # ??? generic path where the VMs will be created - each VM gets its subfolder
 
 # 2. Provide a complex generic local admin pwd
 $adminPassword = '....A complex PWD please.......'   # ??? use single quotes to avoid PS special chars interpretation problems (e.g. $ in pwd problems)
@@ -36,7 +29,7 @@ $testPaths = @(
     @{
         path         = $($GoldenImage)
         errormessage = "Golden image not found at $GoldenImage"
-        abortscript  = $true
+        abortscript  = $false
     }
     @{
         path         = $("$currentPath\1_VMs.psd1")
@@ -102,7 +95,7 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
 foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
     $vmName = $vm.Value.vmName
 
-     if (!([System.String]::IsNullOrEmpty($vm.Value.vmPath))) {
+    if (!([System.String]::IsNullOrEmpty($vm.Value.vmPath))) {
         $vmDirectory = $vm.Value.vmPath + "\" + $vmName
     }
     else {
@@ -367,10 +360,10 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
         Copy-Item -Path $GoldenImagePath -Destination $OSVHD -ErrorAction Stop #-Verbose
     }
     else {
-    $OSVHD = $vhdDirectory + "\" + $(Split-Path -Path $GoldenImage -Leaf)
-    "...copy generic OS disk to $OSVHD"
-    Copy-Item -Path $GoldenImage -Destination $OSVHD -ErrorAction Stop #-Verbose
-}
+        $OSVHD = $vhdDirectory + "\" + $(Split-Path -Path $GoldenImage -Leaf)
+        "...copy generic OS disk to $OSVHD"
+        Copy-Item -Path $GoldenImage -Destination $OSVHD -ErrorAction Stop #-Verbose
+    }
 
     "...mounting OS disk $OSVHD"
     $OSVolumes = Mount-VHD -Path $OSVHD -Passthru | Get-Disk | Get-Partition | Get-Volume
@@ -408,9 +401,9 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
                 #handling static or dynamic IP
                 if (!([System.String]::IsNullOrEmpty($vmUnattendConfig[$vm.Name].'IPAddress'))) {
                     Get-UnattendSection 'specialize' 'Microsoft-Windows-TCPIP' $unattend | ForEach-Object { $_.Interfaces.Interface.UnicastIpAddresses.IpAddress.'#text' = $vmUnattendConfig[$vm.Name].IPAddress + "/" + $($vmUnattendConfig[$vm.Name].IPMask) };
-
+                    
                     if (!([System.String]::IsNullOrEmpty($vmUnattendConfig[$vm.Name].IPGateway))){
-                    Get-UnattendSection 'specialize' 'Microsoft-Windows-TCPIP' $unattend | ForEach-Object { $_.Interfaces.Interface.Routes.Route.NextHopAddress = $vmUnattendConfig[$vm.Name].IPGateway };
+                        Get-UnattendSection 'specialize' 'Microsoft-Windows-TCPIP' $unattend | ForEach-Object { $_.Interfaces.Interface.Routes.Route.NextHopAddress = $vmUnattendConfig[$vm.Name].IPGateway };
                     }else {
                         (Get-UnattendSection 'specialize' 'Microsoft-Windows-TCPIP' $unattend | ForEach-Object { $_.Interfaces.Interface.Routes} ).RemoveAll()
                     }
@@ -426,12 +419,12 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
                 Get-UnattendSection 'oobeSystem' 'Microsoft-Windows-International-Core' $unattend | ForEach-Object { $_.InputLocale = $vmUnattendConfig[$vm.Name].InputLocale };
                 Get-UnattendSection 'oobeSystem' 'Microsoft-Windows-International-Core' $unattend | ForEach-Object { $_.SystemLocale = $vmUnattendConfig[$vm.Name].SystemLocale };
                 Get-UnattendSection 'oobeSystem' 'Microsoft-Windows-International-Core' $unattend | ForEach-Object { $_.UserLocale = $vmUnattendConfig[$vm.Name].UserLocale };
-
-               # Write it out to disk
+    
+                # Write it out to disk
                 $UnattendFile = $($Drive.DriveLetter + ':\Unattend.xml')
                 $unattend.Save($UnattendFile);
             }
-
+    
             if ($(Test-Path "$currentPath\$($vm.Name)") -eq $true) {
                 #is there any folder named like the VMs in the VMs.psd1 e.g. VM0,VM1... if so copy contents into VM
                 $destination = $($Drive.DriveLetter + ':\temp')
@@ -440,16 +433,16 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
             }
         }
     }
-    Dismount-VHD -Path $OSVHD
+    Dismount-VHD -Path $OSVHD 
     "...attaching OS disk to VM"
     Add-VMHardDiskDrive -VMName $VmName -Path $OSVHD
 
     foreach ($vmDataDisk in $vmDataDisks) {
-       "...attaching data disk $($vmDataDisk.DiskName) with size $($vmDataDisk.DiskSize)"
+        "...attaching data disk $($vmDataDisk.DiskName) with size $($vmDataDisk.DiskSize)"
         $DiskPath = $vhdDirectory + "\" + $($vmDataDisk.DiskName)
         New-VHD -Path $DiskPath -SizeBytes $([uint64]$($vmDataDisk.DiskSize)) -Dynamic
         Add-VMHardDiskDrive -VMName $VmName -Path $DiskPath
-    }
+    }   
 
     #make VM boot from first disk
     Set-VMFirmware -VMName $vmName -BootOrder $((Get-VMFirmware $vmName).BootOrder | Where-Object Device -Like "*location 0*")
