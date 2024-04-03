@@ -36,12 +36,13 @@ Start-Transcript "$tmppath\$logfile" -Append
     
     # Download the installer
     try {
+        $ErrorActionPreference = "Stop"
         "1st try to download WAC installer"
-        Invoke-WebRequest -Uri $WACInstallerUrl -OutFile $InstallerPath
+        [System.Net.WebClient]::DownloadFile($WACInstallerUrl, $InstallerPath)
     }
     catch {
         "2nd try to download WAC installer"
-        Invoke-WebRequest -Uri $WACInstallerUrl -OutFile $InstallerPath
+        [System.Net.WebClient]::DownloadFile($WACInstallerUrl, $InstallerPath)
     }
     
     # Install Windows Admin Center
