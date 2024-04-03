@@ -14,7 +14,7 @@ Start-Transcript "$tmppath\$logfile" -Append
 "(step_PrepareAdminBox.ps1) was run at $(Get-Date)"
 
 #region Set Ext IP Address
-    $externalAdapter = Get-NetAdapterAdvancedProperty | Where-Object { $_.DisplayValue -eq $externalAdapterName }
+    $externalAdapter = Get-NetAdapter $externalAdapterName | Get-NetAdapterAdvancedProperty
     $externalAdapterIP = $externalAdapterCIDR.Split('/')[0]
     $externalAdapterIPMask = $externalAdapterCIDR.Split('/')[1]
     Set-NetIPInterface -InterfaceAlias $externalAdapter.ifAlias -Dhcp Enabled -Verbose
@@ -38,11 +38,11 @@ Start-Transcript "$tmppath\$logfile" -Append
     try {
         $ErrorActionPreference = "Stop"
         "1st try to download WAC installer"
-        [System.Net.WebClient]::DownloadFile($WACInstallerUrl, $InstallerPath)
+        [System.Net.WebClient]::new().DownloadFile($WACInstallerUrl, $InstallerPath)
     }
     catch {
         "2nd try to download WAC installer"
-        [System.Net.WebClient]::DownloadFile($WACInstallerUrl, $InstallerPath)
+        [System.Net.WebClient]::new().DownloadFile($WACInstallerUrl, $InstallerPath)
     }
     
     # Install Windows Admin Center
