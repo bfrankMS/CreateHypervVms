@@ -333,10 +333,20 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
         }
         Start-Sleep -Milliseconds 500
 
-        if ($VMNic.Value.VLANID -ne '') {
+        if ($VMNic.Value.VLANID -ne '' -and !($VMNic.Value.TrunkedVLANs)) {
             $internalVLANID = $VMNic.Value.VLANID.Replace("xx", $("{0:00}" -f $i))    #e.g. 1101,1102,...
             #"NIC: {0}   Switch: {1}   VLANID: {2}" -f $VMNic.Name, $VMNic.Value.Switch, $internalVLANID
             Set-VMNetworkAdapterVlan -VMName $vmName -VMNetworkAdapterName $($VMNic.Name) -Access -VlanId $internalVLANID
+        }
+        elseIf ($vmNic.Value.TrunkedVLANs) {
+            If ($VMNic.Value.VLANID -ne '') {
+                $nativeVLANId = $VMNic.Value.VLANID
+            }
+            Else {
+                $nativeVLANId = 0
+            }
+
+            Set-VMNetworkAdapterVlan -VMName $vmName -VMNetworkAdapterName $($VMNic.Name) -Trunk -NativeVlanId $nativeVLANId -AllowedVlanIdList $vmNIC.TrunkedVLANs
         }
         else {
             #"NIC: {0}   Switch: {1}" -f $VMNic.Name, $VMNic.Value.Switch
