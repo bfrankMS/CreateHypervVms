@@ -9,7 +9,7 @@
             @{
                 stepHeadline       = "Step1 - PrepareAdminBox"              # This needs to be adjusted to your network!!!!
                 scriptFilePath     = "step_PrepareAdminBox.ps1"
-                scriptArgumentList= @("Ext","aMGMT","172.31.100.1/16","172.31.0.1","8.8.8.8")  # ??? This needs to be adjusted to your network!!!!
+                scriptArgumentList= @("Ext","aMGMT","172.31.100.1/16","","8.8.8.8")  # ??? This needs to be adjusted to your network!!!!
                 requiresRestart    = $false                                                    # external adapter name (don't change), internal adapter name (don't change), assign an external adapter IP (routable on your network), external adatper gateway (router on your network), google DNS will be used as upstream DNS
             }
             @{

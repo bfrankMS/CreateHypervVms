@@ -5,6 +5,11 @@
 - 2 empty HCI nodes (with a sypreppe'd AzStack HCI 23H2 vhdx you provide) - ready to be deployed to Azure Stack HCI using the Azure portal.  
 ![1DCand2NodesToPlayWith](./docs/3VMs.png)
 
+The deployment will create some VMs on your Hyper-V system:  
+![Overview](./docs/overview.png)
+
+Once the deployment of HCI is done you will have something like this:  
+![nested HCI internal](./docs/internal.png)
 
 ## Watch It On YT  
 [![Installing Azure Stack HCI 23H2 in VMs (Part 1)](https://img.youtube.com/vi/_8QimlTNQpI/0.jpg)](https://youtu.be/_8QimlTNQpI)  
@@ -13,7 +18,9 @@
 ### 1. Provide 2 golden images as vhdx (Win Server 2022 with GUI, AzStack HCI 23H2 vanilla) both from .iso file using e.g. [CreateVhdxFromIso.ps1](./CreateVhdxFromIso.ps1)
 ### 2. Copy the contents of this repo to a temp directory on the physical Hyper-V host.
 ### 3. Edit the files (1_VMs.psd1, 2_UnattendSettings.psd1, 3_PostInstallScripts.psd1, CreateHypervVms.ps1) according to your needs  
-**Search** for all occurrences of the **???** in these files -> read the comments and adjust. 
+To give you an overview here is a diagramm that will show the results if used with the current (default) settings.  
+![Connectivity](./docs/externalconnectivity.png)  
+**Search** for all occurrences of the **???** in these files -> read the comments and adjust. Key is that the config files use the correct settings to connect to **your external** internet router and DNS server (e.g. google dns 8.8.8.8) to be used.
 
 ### 4. Run [CreateHypervVms.ps1](./CreateHypervVms.ps1) on the physical host
 ### 5. [On the physical Host] When the VMs are created enable vlans on the smb adapters.
@@ -85,4 +92,4 @@ catch {
 ```
 
 ### 8. Start your deployment from the Azure Portal  
-*keeping fingers crossed*
+[![Installing Azure Stack HCI 23H2 in VMs (Part 2)](https://img.youtube.com/vi/jSOpU0RmDvw/0.jpg)](https://youtu.be/jSOpU0RmDvw)  
