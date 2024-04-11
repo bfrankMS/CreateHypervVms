@@ -7,7 +7,7 @@ param(
 )
 
 $tmppath = "c:\temp"
-$logfile = "PostInstallScripts.log"
+$logfile = "step_PrepareAdminBox.log"
 #create folder if it doesn't exist
 if (!(Test-Path -Path $tmppath)) { mkdir $tmppath }
 Start-Transcript "$tmppath\$logfile" -Append
@@ -28,29 +28,6 @@ Start-Transcript "$tmppath\$logfile" -Append
 #region Allow RDP
     Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
     Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
-#endregion
-
-#region Install Windows Admin Center
-    $WACInstallerUrl = "https://aka.ms/WACDownload"
-    $InstallerPath = "$tmppath\WACInstaller.msi"
-    
-    # Download the installer
-    try {
-        $ErrorActionPreference = "Stop"
-        "1st try to download WAC installer"
-        [System.Net.WebClient]::new().DownloadFile($WACInstallerUrl, $InstallerPath)
-    }
-    catch {
-        "2nd try to download WAC installer"
-        [System.Net.WebClient]::new().DownloadFile($WACInstallerUrl, $InstallerPath)
-    }
-    
-    # Install Windows Admin Center
-    "Installing Windows Admin Center"
-    Start-Process -FilePath msiexec.exe -ArgumentList "/i `"$InstallerPath`" /qn /L*v $tmppath\WACInstall.log SME_PORT=443 SSL_CERTIFICATE_OPTION=generate" -Wait
-    
-    # Clean up the installer
-    #Remove-Item -Path $InstallerPath
 #endregion
 
 #region Install RRAS feature
@@ -75,13 +52,41 @@ $netshFile = $netshFile -replace "EXTERNAL",$externalAdapterName
 $netshFile = $netshFile -replace "INTERNAL",$internalAdapterName
 
 "Configuring RRAS"
-$netshFile | Out-File -FilePath "$tmppath\netshfile.txt" -Encoding ascii 
+$netshFile | Out-File -FilePath "$tmppath\netshfile.txt" -Encoding ascii -Verbose
 Start-Process -FilePath netsh -ArgumentList  "-f $tmppath\netshfile.txt" -Wait -Verbose
 
 Start-Process -FilePath sc -ArgumentList "config remoteaccess start=auto" -Wait -Verbose
 Start-Process -FilePath net -ArgumentList "net start remoteaccess" -Wait -Verbose
 
 #endregion
+
+#region Install Windows Admin Center
+    $WACInstallerUrl = "https://aka.ms/WACDownload"
+    $InstallerPath = "$tmppath\WACInstaller.msi"
+    
+    # Download the installer
+    try {
+        $ErrorActionPreference = "Stop"
+        "1st try to download WAC installer"
+        [System.Net.WebClient]::new().DownloadFile($WACInstallerUrl, $InstallerPath)
+    }
+    catch {
+        "2nd try to download WAC installer"
+        [System.Net.WebClient]::new().DownloadFile($WACInstallerUrl, $InstallerPath)
+    }
+    
+    # Install Windows Admin Center
+    "Installing Windows Admin Center"
+    Start-Process -FilePath msiexec.exe -ArgumentList "/i `"$InstallerPath`" /qn /L*v $tmppath\WACInstall.log SME_PORT=443 SSL_CERTIFICATE_OPTION=generate" -Wait
+    
+    #place shortcut on desktop
+    $Shell = New-Object -ComObject "WScript.Shell"
+    $ShortCut = $Shell.CreateShortcut($env:ALLUSERSPROFILE + "\Desktop\Windows Admin Center.url")
+    $ShortCut.TargetPath = "https://localhost"
+    $ShortCut.Save()
+    
+#endregion
+
 
 #region Install MMC tools
 "Installing MMC tools"

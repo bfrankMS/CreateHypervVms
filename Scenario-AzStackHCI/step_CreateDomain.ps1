@@ -9,7 +9,7 @@ param(
 #this will be our temp folder - need it for download / logging
 
 $tmppath = "c:\temp\" 
-$logfile = "PostInstallScripts.log"
+$logfile = "step_CreateDomain.log"
 #create folder if it doesn't exist
 if (!(Test-Path -Path $tmppath)) { mkdir $tmppath }
 Start-Transcript "$tmppath\$logfile" -Append

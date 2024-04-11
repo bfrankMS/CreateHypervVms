@@ -41,7 +41,7 @@ Works either launched locally or using PS remoting.
 1. Copy the selected repository's content to your Hyper-V system - e.g. c:\temp
 2. Create a sysprep'ed .vhdx containing the Windows OS you want using [e.g. CreateVhdxFromIso.ps1](./Scenario-Blueprint/CreateVhdxFromIso.ps1).
 ```PowerShell
-.\CreateVhdxFromIso.ps1 -SourcePath "D:\iso\Windows Server 2022\SERVER_EVAL_x64FRE_en-us.iso" -VhdxPath 'c:\images\W2k22.vhdx' -SizeBytes 80GB -ImageIndex 4
+.\CreateVhdxFromIso.ps1 -IsoPath "D:\iso\Windows Server 2022\SERVER_EVAL_x64FRE_en-us.iso" -VhdxPath 'c:\images\W2k22.vhdx' -SizeBytes 80GB -ImageIndex 4
 # you can use .iso files with OS from Microsoft.
 # -ImageIndex 1 : is the first image in the install.wim 
 # -ImageIndex 1 : mostly is a Server Standard Core

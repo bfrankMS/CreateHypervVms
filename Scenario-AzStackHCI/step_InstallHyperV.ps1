@@ -1,5 +1,5 @@
 $tmppath = "c:\temp"
-$logfile = "PostInstallScripts.log"
+$logfile = "step_InstallHyperV.log"
 #create folder if it doesn't exist
 if (!(Test-Path -Path $tmppath)){mkdir $tmppath}
 Start-Transcript "$tmppath\$logfile" -Append
