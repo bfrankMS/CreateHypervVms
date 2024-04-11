@@ -11,7 +11,7 @@ $tmpDir = "c:\temp\"
 if (!(Test-Path $tmpDir)) { mkdir $tmpDir -Force }
             
 #write a log file with the same name of the script
-Start-Transcript "$tmpDir\PostInstallScripts.log"
+Start-Transcript "$tmpDir\step_JoinDomain.log"
             
 "(step_JoinDomain.ps1) was run at $(Get-Date)"
             
