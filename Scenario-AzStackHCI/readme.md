@@ -93,3 +93,16 @@ catch {
 
 ### 8. Start your deployment from the Azure Portal  
 [![Installing Azure Stack HCI 23H2 in VMs (Part 2)](https://img.youtube.com/vi/jSOpU0RmDvw/0.jpg)](https://youtu.be/jSOpU0RmDvw)  
+
+### 9. Troubleshooting  
+if you get this error:  
+![you probably forgot to allow trunks](./docs/errortrunkmissing.png)  
+Do run this on the **host** executing the VMs:  
+```PowerShell
+# This will make the nested HCIs storage adapters allow vlan usage  
+Get-VMNetworkAdapter -vmname '00-hci-1' -Name smb* | Set-VMNetworkAdapterVlan -Trunk -NativeVlanId 0 -AllowedVlanIdList 711-712
+Get-VMNetworkAdapter -vmname '00-hci-2' -Name smb* | Set-VMNetworkAdapterVlan -Trunk -NativeVlanId 0 -AllowedVlanIdList 711-712
+
+```  
+and rerun the deployment one more time.  
+![rerun button](./docs/rerun.png) 
