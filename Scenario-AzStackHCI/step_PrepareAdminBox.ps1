@@ -75,8 +75,11 @@ Start-Process -FilePath net -ArgumentList "net start remoteaccess" -Wait -Verbos
     }
     
     # Install Windows Admin Center
-    "Installing Windows Admin Center"
-    Start-Process -FilePath msiexec.exe -ArgumentList "/i `"$InstallerPath`" /qn /L*v $tmppath\WACInstall.log SME_PORT=443 SSL_CERTIFICATE_OPTION=generate" -Wait
+    if (Test-Path -Path $InstallerPath)
+     {
+        "Installing Windows Admin Center"
+        Start-Process -FilePath msiexec.exe -ArgumentList "/i `"$InstallerPath`" /qn /L*v $tmppath\WACInstall.log SME_PORT=443 SSL_CERTIFICATE_OPTION=generate" -Wait
+     }    
     
     #place shortcut on desktop
     $Shell = New-Object -ComObject "WScript.Shell"
