@@ -18,6 +18,9 @@ if ($os.Name -like "*Azure Stack HCI*") {
 Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
 
+#rename network adapters to match the device names (this changed now in .469)
+get-netadapter | %{$value = (Get-NetAdapterAdvancedProperty $_.Name -RegistryKeyword 'HyperVNetwork*').DisplayValue;$value; Rename-NetAdapter -Name $_.Name -NewName $value}
+
 #Add-VMNetworkAdapter -ManagementOS -Name vmswitch -SwitchName 'SetSwitch'
 #New-NetIPAddress -IPAddress 192.168.0.1 -PrefixLength 24 -InterfaceAlias 'vEthernet (vmswitch)'
 #New-NetNAT -Name 'vmswitchNAT' -InternalIPInterfaceAddressPrefix 192.168.0.0/24
