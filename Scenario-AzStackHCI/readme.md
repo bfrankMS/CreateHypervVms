@@ -53,14 +53,16 @@ Write-Output "Installing PackageManagement"
 Install-Package -Name PackageManagement -MinimumVersion 1.4.8 -Force -Confirm:$false -Source PSGallery
 Write-Output "Installing PowershellGet"
 Install-Package -Name PowershellGet -Force -Verbose
-Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted -verbose
 
-$modules = @("Az.Accounts", "Az.Resources", "Az.Storage", "AzsHCI.ARCinstaller","Az.ConnectedMachine")
-foreach ($module in $modules) {
-    if (!(Get-Module -Name $module -ListAvailable)) {
-        Install-Module -Name $module -Force
-    }
-}
+Register-PSRepository -Default -InstallationPolicy Trusted
+
+#Install required PowerShell modules in your node for registration
+Install-Module Az.Accounts -RequiredVersion 2.13.2 
+Install-Module Az.Resources -RequiredVersion 6.12.0 
+Install-Module Az.ConnectedMachine -RequiredVersion 0.5.2 
+
+#Install Arc registration script from PSGallery 
+Install-Module AzSHCI.ARCInstaller -RequiredVersion 0.2.2616.70 # avoiding registration errors in nested environments
 
 ``` 
 
@@ -78,7 +80,7 @@ $tenantID = "47f4...........aab0"
 $rg = "rg-myHCI...."    # an existing an configured RG.
 $region = "westeurope"  #or eastus???
 try {
-  Connect-AzAccount -TenantId $tenantID -UseDeviceAuthentication
+  Connect-AzAccount -TenantId $tenantID -Subscription $subscription -UseDeviceAuthentication
   $armAccessToken = (Get-AzAccessToken).Token
   $id = (Get-AzContext).Account.Id
   Start-Sleep -Seconds 3
