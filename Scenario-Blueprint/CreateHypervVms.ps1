@@ -102,7 +102,7 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
 foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
     $vmName = $vm.Value.vmName
 
-     if (!([System.String]::IsNullOrEmpty($vm.Value.vmPath))) {
+    if (!([System.String]::IsNullOrEmpty($vm.Value.vmPath))) {
         $vmDirectory = $vm.Value.vmPath + "\" + $vmName
     }
     else {
@@ -367,10 +367,10 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
         Copy-Item -Path $GoldenImagePath -Destination $OSVHD -ErrorAction Stop #-Verbose
     }
     else {
-    $OSVHD = $vhdDirectory + "\" + $(Split-Path -Path $GoldenImage -Leaf)
-    "...copy generic OS disk to $OSVHD"
-    Copy-Item -Path $GoldenImage -Destination $OSVHD -ErrorAction Stop #-Verbose
-}
+        $OSVHD = $vhdDirectory + "\" + $(Split-Path -Path $GoldenImage -Leaf)
+        "...copy generic OS disk to $OSVHD"
+        Copy-Item -Path $GoldenImage -Destination $OSVHD -ErrorAction Stop #-Verbose
+    }
 
     "...mounting OS disk $OSVHD"
     $OSVolumes = Mount-VHD -Path $OSVHD -Passthru | Get-Disk | Get-Partition | Get-Volume
@@ -408,9 +408,9 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
                 #handling static or dynamic IP
                 if (!([System.String]::IsNullOrEmpty($vmUnattendConfig[$vm.Name].'IPAddress'))) {
                     Get-UnattendSection 'specialize' 'Microsoft-Windows-TCPIP' $unattend | ForEach-Object { $_.Interfaces.Interface.UnicastIpAddresses.IpAddress.'#text' = $vmUnattendConfig[$vm.Name].IPAddress + "/" + $($vmUnattendConfig[$vm.Name].IPMask) };
-
+                    
                     if (!([System.String]::IsNullOrEmpty($vmUnattendConfig[$vm.Name].IPGateway))){
-                    Get-UnattendSection 'specialize' 'Microsoft-Windows-TCPIP' $unattend | ForEach-Object { $_.Interfaces.Interface.Routes.Route.NextHopAddress = $vmUnattendConfig[$vm.Name].IPGateway };
+                        Get-UnattendSection 'specialize' 'Microsoft-Windows-TCPIP' $unattend | ForEach-Object { $_.Interfaces.Interface.Routes.Route.NextHopAddress = $vmUnattendConfig[$vm.Name].IPGateway };
                     }else {
                         (Get-UnattendSection 'specialize' 'Microsoft-Windows-TCPIP' $unattend | ForEach-Object { $_.Interfaces.Interface.Routes} ).RemoveAll()
                     }
@@ -426,12 +426,12 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
                 Get-UnattendSection 'oobeSystem' 'Microsoft-Windows-International-Core' $unattend | ForEach-Object { $_.InputLocale = $vmUnattendConfig[$vm.Name].InputLocale };
                 Get-UnattendSection 'oobeSystem' 'Microsoft-Windows-International-Core' $unattend | ForEach-Object { $_.SystemLocale = $vmUnattendConfig[$vm.Name].SystemLocale };
                 Get-UnattendSection 'oobeSystem' 'Microsoft-Windows-International-Core' $unattend | ForEach-Object { $_.UserLocale = $vmUnattendConfig[$vm.Name].UserLocale };
-
-               # Write it out to disk
+    
+                # Write it out to disk
                 $UnattendFile = $($Drive.DriveLetter + ':\Unattend.xml')
                 $unattend.Save($UnattendFile);
             }
-
+    
             if ($(Test-Path "$currentPath\$($vm.Name)") -eq $true) {
                 #is there any folder named like the VMs in the VMs.psd1 e.g. VM0,VM1... if so copy contents into VM
                 $destination = $($Drive.DriveLetter + ':\temp')
@@ -440,16 +440,16 @@ foreach ($vm in $($vmConfig.GetEnumerator() | Sort-Object Name)) {
             }
         }
     }
-    Dismount-VHD -Path $OSVHD
+    Dismount-VHD -Path $OSVHD 
     "...attaching OS disk to VM"
     Add-VMHardDiskDrive -VMName $VmName -Path $OSVHD
 
     foreach ($vmDataDisk in $vmDataDisks) {
-       "...attaching data disk $($vmDataDisk.DiskName) with size $($vmDataDisk.DiskSize)"
+        "...attaching data disk $($vmDataDisk.DiskName) with size $($vmDataDisk.DiskSize)"
         $DiskPath = $vhdDirectory + "\" + $($vmDataDisk.DiskName)
         New-VHD -Path $DiskPath -SizeBytes $([uint64]$($vmDataDisk.DiskSize)) -Dynamic
         Add-VMHardDiskDrive -VMName $VmName -Path $DiskPath
-    }
+    }   
 
     #make VM boot from first disk
     Set-VMFirmware -VMName $vmName -BootOrder $((Get-VMFirmware $vmName).BootOrder | Where-Object Device -Like "*location 0*")
@@ -484,7 +484,27 @@ foreach ($postInstallVM in $postInstallVMs) {
     }
 
     Wait-ForPSDirect $vmName $UserCredential # wait till VM is up and responsive
-        
+    
+    #run vmCopySteps
+    if ($postInstallVM.value.vmCopySteps.count -gt 0) {
+        Enable-VMIntegrationService -Name 'Guest Service Interface' -VMName $vmName #required for file copy
+
+        foreach ($item in $($postInstallVM.value.vmCopySteps)) {
+            $invokeParameters = @{
+                Name            = $vmName
+                SourcePath      = $item.sourcePath
+                DestinationPath = $item.destPath
+                CreateFullPath  = $true
+                FileSource      = 'Host'
+            }
+            "...copy action: '{0}'" -f $item.stepHeadline
+            Copy-VMFile @invokeParameters -Verbose
+            "...end of copy: '{0}'" -f $item.stepHeadline
+        }
+        Disable-VMIntegrationService -Name 'Guest Service Interface' -VMName $vmName #to get back to the defaults
+    }
+
+    #run vmPostInstallSteps
     foreach ($item in $($postInstallVM.value.vmPostInstallSteps)) {
         if (!([string]::IsNullOrWhiteSpace($item.scriptArgumentList))) {
             $invokeParameters = @{

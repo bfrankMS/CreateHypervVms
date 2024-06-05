@@ -477,7 +477,27 @@ foreach ($postInstallVM in $postInstallVMs) {
     }
 
     Wait-ForPSDirect $vmName $UserCredential # wait till VM is up and responsive
-        
+    
+    #run vmCopySteps
+    if ($postInstallVM.value.vmCopySteps.count -gt 0) {
+        Enable-VMIntegrationService -Name 'Guest Service Interface' -VMName $vmName #required for file copy
+
+        foreach ($item in $($postInstallVM.value.vmCopySteps)) {
+            $invokeParameters = @{
+                Name            = $vmName
+                SourcePath      = $item.sourcePath
+                DestinationPath = $item.destPath
+                CreateFullPath  = $true
+                FileSource      = 'Host'
+            }
+            "...copy action: '{0}'" -f $item.stepHeadline
+            Copy-VMFile @invokeParameters -Verbose
+            "...end of copy: '{0}'" -f $item.stepHeadline
+        }
+        Disable-VMIntegrationService -Name 'Guest Service Interface' -VMName $vmName #to get back to the defaults
+    }
+
+    #run vmPostInstallSteps
     foreach ($item in $($postInstallVM.value.vmPostInstallSteps)) {
         if (!([string]::IsNullOrWhiteSpace($item.scriptArgumentList))) {
             $invokeParameters = @{
