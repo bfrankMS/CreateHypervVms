@@ -18,6 +18,15 @@
         )
     }
     VM1 = @{
+        <#
+        vmCopySteps = @(
+            @{
+                stepHeadline    = 'Copy something to the VM'
+                sourcePath       = '.\copyIntoVM.txt'              # local (in this folder) archive to be copied to vm
+                destPath        = 'c:\temp\copyIntoVM.txt'         # destination full path inside the vm
+            } 
+        )
+        #>
         vmPostInstallSteps = @(
             @{
                 stepHeadline    = "Step0 - TimeStamp"

@@ -26,13 +26,6 @@
         )
     }
     VM1 = @{
-        vmCopySteps = @(
-            @{
-                stepHeadline    = 'Copy something to the VM'
-                sourcePath       = '.\intoHCI.zip'              # local (in this folder) archive to be copied to vm
-                destPath        = 'c:\temp\intoHCI.zip'         # destination full path inside the vm
-            } 
-        )
         vmPostInstallSteps = @(
             @{
                 stepHeadline    = 'Step0 - TimeStamp'

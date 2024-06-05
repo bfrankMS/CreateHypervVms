@@ -1,0 +1,3 @@
+If you see this inside the VM...it came from the host :-)
+'vmCopySteps' in the 3_PostInstallScripts.psd1 offers a way to inject files into a windows vm - by using Hyper-V Host to VM copy functionality
+(should work even when the VM has not network)
