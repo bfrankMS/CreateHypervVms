@@ -4,16 +4,9 @@
 #
 ##########################################################
 
-# inspirations and alternatives.
-# https://github.com/microsoft/MSLab
-# https://github.com/BladeFireLight/WindowsImageTools/tree/master
-# https://learn.microsoft.com/en-us/archive/blogs/virtual_pc_guy/script-image-factory-for-hyper-v
-# http://www.altaro.com/hyper-v/creating-generation-2-disk-powershell/
-
-
 # 1. Create a golden image and adjust these variables
 $GoldenImage = "c:\.....\W2k22.vhdx"       # ??? path to a sysprepped virtual hard disk (UEFI i.e. Gen2 VMs) to be used as a golden image
-$vmDirectoryPrefix = "c:\.....your VM storage....\myVms"   # ??? generic path where the VMs will be created - each VM gets its subfolder
+$vmDirectoryPrefix = "c:\.....your VM storage....\AzStack"   # ??? generic path where the VMs will be created - each VM gets its subfolder
 
 # 2. Provide a complex generic local admin pwd
 $adminPassword = '....A complex PWD please.......'   # ??? use single quotes to avoid PS special chars interpretation problems (e.g. $ in pwd problems)
@@ -36,7 +29,7 @@ $testPaths = @(
     @{
         path         = $($GoldenImage)
         errormessage = "Golden image not found at $GoldenImage"
-        abortscript  = $true
+        abortscript  = $false
     }
     @{
         path         = $("$currentPath\1_VMs.psd1")
@@ -50,7 +43,7 @@ $testPaths = @(
     }
     @{
         path         = $("$currentPath\3_PostInstallScripts.psd1")
-        errormessage = "Unattend config file not found at $currentPath\2_UnattendSettings.psd1"
+        errormessage = "Cannot find post install script options at $currentPath\3_PostInstallScripts.psd1"
         abortscript  = $false
     }
 )

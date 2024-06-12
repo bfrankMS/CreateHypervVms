@@ -43,7 +43,7 @@ $testPaths = @(
     }
     @{
         path         = $("$currentPath\3_PostInstallScripts.psd1")
-        errormessage = "Unattend config file not found at $currentPath\2_UnattendSettings.psd1"
+        errormessage = "Cannot find post install script options at $currentPath\3_PostInstallScripts.psd1"
         abortscript  = $false
     }
 )
