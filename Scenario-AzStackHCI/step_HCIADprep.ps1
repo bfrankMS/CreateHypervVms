@@ -15,7 +15,10 @@ $adPrepCode = @"
 `$deployUserPwd = "%YourPasswordHere%"
 
 #Import-Module .\AsHciADArtifactsPreCreationTool.psm1
+Install-PackageProvider -Name NuGet -confirm:$false -force
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 Install-Module AsHciADArtifactsPreCreationTool -Repository PSGallery -Force
+Set-PSRepository -Name PSGallery -InstallationPolicy Untrusted
 
 `$securePwd = ConvertTo-SecureString "`$deployUserPwd" -AsPlainText -Force
 `$credential = New-Object System.Management.Automation.PSCredential (`$deployUserName, `$securePwd)
