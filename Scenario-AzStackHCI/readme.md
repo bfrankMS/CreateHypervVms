@@ -50,7 +50,7 @@ $deployUserPwd = "........"
 ```PowerShell
 Set-Variable -Name 'ConfirmPreference' -Value 'None' -Scope Global
 Write-Output "Installing PackageManagement"
-Install-Package -Name PackageManagement -MinimumVersion 1.4.8 -Force -Confirm:$false -Source PSGallery
+Install-Package -Name PackageManagement -MinimumVersion 1.4.8 -Force -Confirm:$false
 Write-Output "Installing PowershellGet"
 Install-Package -Name PowershellGet -Force -Verbose
 
